@@ -34,3 +34,7 @@ coverage.out
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Backup files
+*.bak
+*~
