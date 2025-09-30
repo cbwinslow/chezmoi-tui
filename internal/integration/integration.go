@@ -74,7 +74,10 @@ func (ci *ChezmoiIntegration) DiffFiles(targets ...string) (string, error) {
 
 // InitializeRepo initializes the source directory with a remote repository
 func (ci *ChezmoiIntegration) InitializeRepo(repo string, apply bool) (string, error) {
-	args := []string{repo}
+	args := []string{}
+	if repo != "" {
+		args = append(args, repo)
+	}
 	if apply {
 		args = append(args, "--apply")
 	}

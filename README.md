@@ -57,4 +57,16 @@ For usage details, see [docs/usage.md](docs/usage.md).
 
 ## Contributing
 
+We welcome contributions to the project! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) guide for details on how to get started.
+
 This project extends the functionality of the existing chezmoi tool to provide enhanced TUI and CLI experiences.
+
+## Features
+
+- Interactive Terminal User Interface (TUI) for managing dotfiles
+- Enhanced Command Line Interface (CLI) with additional commands
+- Seamless integration with existing chezmoi workflows
+- Comprehensive test suite covering unit, integration, and performance tests
+- CI/CD pipeline with automated testing and releases
+- Docker support for containerized usage
+- Cross-platform compatibility
