@@ -1,0 +1,36 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.o
+*.a
+
+# Build artifacts
+chezmoi-tui
+build/
+dist/
+
+# Go specific
+*.test
+*.prof
+go.work.sum
+coverage.out
+
+# Editor specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment specific
+.env
+.env.local
+.env.production
+.env.test
+
+# OS specific
+.DS_Store
+Thumbs.db
