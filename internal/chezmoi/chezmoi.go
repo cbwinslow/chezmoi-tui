@@ -68,6 +68,11 @@ func (c *Chezmoi) Init(args ...string) (string, error) {
 	return c.Run(initWithArgs...)
 }
 
+// GetBinaryPath returns the path to the chezmoi binary
+func (c *Chezmoi) GetBinaryPath() string {
+	return c.binaryPath
+}
+
 // Managed runs the chezmoi managed command to list managed entries
 func (c *Chezmoi) Managed() (string, error) {
 	return c.Run("managed")
