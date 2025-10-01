@@ -1,93 +1,186 @@
-# Chezmoi TUI/CLI System Architecture
+# Chezmoi TUI - Architecture Overview
 
-## Overview
-The Chezmoi TUI/CLI system will enhance the existing Chezmoi tool with a more user-friendly terminal interface and additional CLI capabilities. The system will maintain compatibility with existing Chezmoi functionality while providing enhanced user experience.
+This document provides a comprehensive overview of the Chezmoi TUI project architecture.
 
-## Components
+## Project Structure
 
-### 1. Core CLI Module
-- Enhanced command-line interface with improved feedback
-- Integration with existing chezmoi functionality
-- Additional utility commands
-- Consistent command structure matching original chezmoi
-
-### 2. Terminal UI (TUI) Module
-- Interactive terminal user interface for dotfile management
-- Visual representation of dotfile status
-- Interactive commands for common operations
-- Real-time updates and feedback
-
-### 3. Integration Layer
-- Wrapper around existing chezmoi functionality
-- Ensures compatibility with existing workflows
-- Bridges TUI/CLI interface to underlying chezmoi operations
-
-## Technical Architecture
-
-### Language & Frameworks
-- Go programming language (to match chezmoi's implementation)
-- Bubble Tea framework for TUI (popular Go TUI framework)
-- Cobra for CLI command structure
-- Standard Go modules for dependencies
-
-### Structure
 ```
 chezmoi-tui/
-├── cmd/                 # Command entry points
-│   ├── root.go         # Root command
-│   ├── tui.go          # TUI command
-│   ├── apply.go        # Apply command
-│   ├── status.go       # Status command
-│   └── ...
-├── internal/            # Internal packages
-│   ├── chezmoi/        # Wrapper around chezmoi functionality
-│   ├── tui/            # TUI components and logic
-│   │   ├── model.go    # TUI state model
-│   │   ├── view.go     # TUI rendering
-│   │   └── commands.go # TUI commands
-│   └── utils/          # Utility functions
-├── ui/                  # TUI specific components
-│   ├── statusview/     # Status view component
-│   ├── fileview/       # File management view
-│   └── ...
-├── docs/               # Documentation
-├── examples/           # Example usage
-├── tests/              # Test files
-└── scripts/            # Build and utility scripts
+├── cmd/                    # CLI command definitions
+│   └── main.go             # Application entry point
+├── docs/                   # Documentation files
+├── examples/               # Example usage files
+├── internal/               # Internal packages (not importable by other projects)
+│   ├── chezmoi/            # Low-level chezmoi wrapper
+│   ├── integration/        # High-level integration layer
+│   └── utils/              # Utility functions
+├── pkg/                    # Shared packages (importable by other projects)
+│   ├── commands/           # CLI command implementations
+│   └── root/               # Root command definition
+├── scripts/                # Utility scripts
+├── tests/                  # Test files
+│   ├── e2e/                # End-to-end tests
+│   ├── performance/        # Performance tests
+│   └── unit/               # Unit tests
+├── ui/                     # Terminal User Interface components
+├── .github/                # GitHub Actions workflows
+│   └── workflows/          # CI/CD configuration
+├── go.mod                  # Go module definition
+├── go.sum                  # Go module checksums
+├── Dockerfile              # Container configuration
+├── Makefile                # Build and development tasks
+└── README.md               # Project overview
 ```
 
-### TUI Architecture
-- Model-View-Update (MVU) pattern using Bubble Tea
-- State management for different views (status, file management, etc.)
-- Key bindings for navigation and actions
-- Modal dialogs for confirmations and input
+## Core Architecture Layers
 
-## Key Features
+### 1. Presentation Layer
+- **UI Package** (`ui/`): Bubble Tea based TUI
+- **Commands Package** (`pkg/commands/`): CLI command definitions
+- **Root Package** (`pkg/root/`): Main command configuration
 
-### Enhanced CLI Features
-- Verbose output with progress indicators
-- Dry-run with detailed previews
-- Contextual help with examples
-- Better error messages and handling
+### 2. Business Logic Layer
+- **Integration Package** (`internal/integration/`): High-level operations
+- **Chezmoi Package** (`internal/chezmoi/`): Low-level chezmoi wrapper
 
-### TUI Features
-- Visual status dashboard
-- Interactive file selection
-- One-key operations (add, apply, edit, diff)
-- Real-time status updates
-- Search and filter capabilities
-- Keyboard navigation
+### 3. External Dependencies
+- Original `chezmoi` binary
+- Go standard library
+- Third-party libraries (Cobra, Bubble Tea, etc.)
 
-## Integration with Existing Chezmoi
-- Maintain full compatibility with existing chezmoi configs
-- Use existing chezmoi binary as backend where possible
-- Preserve all existing functionality
-- Add new features as enhancements, not replacements
+## Design Patterns
 
-## Implementation Plan
-1. Set up basic project structure and dependencies
-2. Implement CLI enhancements
-3. Develop TUI components
-4. Create integration layer
-5. Add comprehensive testing
-6. Polish and document
+### Command Pattern (CLI)
+- Uses Cobra framework for CLI command structure
+- Each command is a separate package following the same pattern
+- Commands use the integration layer for functionality
+- Consistent error handling and return types
+
+### Model-View-Update (TUI)
+- Uses Bubble Tea framework for TUI
+- Model represents the state of the UI
+- Update function handles messages and state changes
+- View function renders the UI
+
+### Facade Pattern (Integration Layer)
+- `internal/integration` provides a unified interface
+- Hides complexity of the underlying chezmoi wrapper
+- Provides enhanced functionality and error handling
+- Abstracts away direct interactions with chezmoi
+
+## Data Flow
+
+### CLI Data Flow
+1. User executes CLI command
+2. Cobra routes to appropriate command handler
+3. Command calls integration layer methods
+4. Integration layer calls chezmoi wrapper
+5. Chezmoi wrapper executes chezmoi binary
+6. Results are processed and returned to user
+
+### TUI Data Flow
+1. TUI model receives user input
+2. Model calls integration layer methods
+3. Integration layer calls chezmoi wrapper
+4. Results are processed and update the model
+5. Updated model is rendered to the terminal
+
+## Security Architecture
+
+### Secrets Management
+- Uses Chezmoi's built-in encryption for sensitive files
+- Environment variables for runtime secrets
+- GitHub Actions secrets for CI/CD
+- No hardcoded credentials in source code
+
+### Access Control
+- All external command execution is validated
+- Input validation for all user-provided values
+- Proper error handling to prevent information disclosure
+
+## Build and Deployment
+
+### Local Development
+- Standard Go build process
+- Makefile for common tasks
+- Docker support for containerization
+
+### CI/CD Pipeline
+- Automated testing on multiple platforms
+- Security scanning
+- Cross-platform builds
+- Automated releases
+- Docker image building and publishing
+
+## Error Handling Strategy
+
+### CLI Error Handling
+- Proper exit codes for different failure types
+- User-friendly error messages
+- Detailed error logging for debugging
+- Graceful degradation when possible
+
+### TUI Error Handling
+- Non-fatal errors displayed in UI
+- Recovery from common errors
+- Clear error messages to the user
+- Preserved UI state when possible
+
+## Testing Architecture
+
+### Unit Tests
+- Located in `internal/*/` directories alongside code
+- Test individual functions and methods
+- Mock external dependencies where appropriate
+- Focus on core business logic
+
+### Integration Tests
+- Test interactions between components
+- Validate integration layer functionality
+- Test real interactions with chezmoi when available
+
+### Performance Tests
+- Located in `tests/performance/`
+- Benchmark critical operations
+- Monitor response times
+- Track performance regressions
+
+### End-to-End Tests
+- Located in `tests/e2e/`
+- Test complete user workflows
+- Validate integration between all components
+- Test CLI and TUI functionality
+
+## Extensibility Points
+
+### Adding CLI Commands
+1. Create new file in `pkg/commands/`
+2. Define command using Cobra
+3. Implement using integration layer
+4. Register with root command
+
+### Adding TUI Features
+1. Extend the Model struct
+2. Update the Update function to handle new messages
+3. Update the View function to render new elements
+4. Add new keyboard bindings
+
+### Adding Integration Features
+1. Add new methods to integration layer
+2. Implement using chezmoi wrapper
+3. Add appropriate error handling
+4. Update tests and documentation
+
+## Deployment Architecture
+
+### Containerized Deployment
+- Multi-architecture Docker images
+- Minimal base images for security
+- Non-root execution
+- Proper resource limits
+
+### Binary Distribution
+- Cross-platform builds
+- Signed releases
+- Checksum verification
+- Multiple installation methods
