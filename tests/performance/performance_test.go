@@ -1,10 +1,10 @@
 package performance
 
 import (
+	"chezmoi-tui/internal/chezmoi"
+	"chezmoi-tui/internal/integration"
 	"testing"
 	"time"
-	"chezmoi-tui/internal/integration"
-	"chezmoi-tui/internal/chezmoi"
 )
 
 // BenchmarkIntegrationGetStatus benchmarks the GetStatus function
@@ -31,9 +31,9 @@ func BenchmarkChezmoiParseStatusOutput(b *testing.B) {
 	for i := 0; i < 100; i++ {
 		sampleOutput += " M .file" + string(rune('0'+i)) + "\\n"
 	}
-	
-	client := &chezmoi.Chezmoi{}  // Note: This will need to be imported properly
-	
+
+	client := &chezmoi.Chezmoi{} // Note: This will need to be imported properly
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		client.ParseStatusOutput(sampleOutput)
@@ -46,16 +46,16 @@ func TestResponseTime(t *testing.T) {
 	if err != nil {
 		t.Skipf("Skipping test: %v", err) // Skip if chezmoi isn't available
 	}
-	
+
 	t.Run("GetConfigDataResponseTime", func(t *testing.T) {
 		start := time.Now()
 		_, err := integ.GetConfigData()
 		duration := time.Since(start)
-		
+
 		if err != nil {
 			t.Logf("GetConfigData returned error: %v", err)
 		}
-		
+
 		// We expect the operation to complete in under 5 seconds
 		if duration > 5*time.Second {
 			t.Errorf("GetConfigData took too long: %v", duration)
@@ -63,16 +63,16 @@ func TestResponseTime(t *testing.T) {
 			t.Logf("GetConfigData completed in: %v", duration)
 		}
 	})
-	
+
 	t.Run("GetManagedFilesResponseTime", func(t *testing.T) {
 		start := time.Now()
 		_, err := integ.GetManagedFiles()
 		duration := time.Since(start)
-		
+
 		if err != nil {
 			t.Logf("GetManagedFiles returned error: %v", err)
 		}
-		
+
 		// We expect the operation to complete in under 5 seconds
 		if duration > 5*time.Second {
 			t.Errorf("GetManagedFiles took too long: %v", duration)

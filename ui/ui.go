@@ -87,7 +87,7 @@ func RunTUI() error {
 
 // initialModel returns the initial state of the UI
 func initialModel(integ *integration.ChezmoiIntegration) Model {
-	choices := []string{"View Status", "Add Files", "Apply Changes", "Diff Changes", "Show Stats", "Exit"}
+	choices := []string{"View Status", "Add Files", "Apply Changes", "Diff Changes", "Show Stats", "Bitwarden Manager", "Exit"}
 	
 	// Create items for the list
 	var items []list.Item
@@ -198,6 +198,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						}
 						m.viewport.SetContent(statsContent)
 						m.showFiles = true // Reuse the file view for stats display
+					} else if item.title == "Bitwarden Manager" {
+						// Show Bitwarden manager information
+						bwContent := generateBitwardenContent()
+						m.viewport.SetContent(bwContent)
+						m.showFiles = true
 					}
 				}
 			}
@@ -372,7 +377,7 @@ func generateStatsContent(integ *integration.ChezmoiIntegration) (string, error)
 	content.WriteString(fmt.Sprintf("│ Last Updated: %-47s │\n", time.Now().Format("2006-01-02 15:04:05")))
 	content.WriteString("├─────────────────────────────────────────────────────────────────┤\n")
 	content.WriteString(fmt.Sprintf("│ Total Managed Files:    %3d                                   │\n", len(validManagedFiles)))
-	content.WriteString(fmt.Sprintf("│ Total Unmanaged Files:  %3d                                   │\n", len(validUnmanagedFiles)))
+	content.WriteString(fmt.Sprintf("│ Total Unmanaged Files:  %3d                                   │\n", len(validManagedFiles)))
 	content.WriteString("├─────────────────────────────────────────────────────────────────┤\n")
 	content.WriteString(fmt.Sprintf("│ Up to Date:             %3d (%3d%%)                           │\n", 
 		upToDateCount, calculatePercentage(upToDateCount, len(validManagedFiles))))
@@ -396,6 +401,30 @@ func calculatePercentage(part, total int) int {
 	return int(float64(part) / float64(total) * 100)
 }
 
+func generateBitwardenContent() string {
+	return "┌─ Bitwarden Secrets Manager ─────────────────────────────────────┐\n" +
+		"│                                                                 │\n" +
+		"│  Manage your Bitwarden vault from within Chezmoi TUI           │\n" +
+		"│                                                                 │\n" +
+		"│  Features:                                                      │\n" +
+		"│  • View and manage Bitwarden items                              │\n" +
+		"│  • Unlock/Lock your vault                                       │\n" +
+		"│  • Sync with remote server                                      │\n" +
+		"│  • Integration with Chezmoi templates                            │\n" +
+		"│  • Launch dedicated Bitwarden TUI                               │\n" +
+		"│                                                                 │\n" +
+		"│  CLI Commands:                                                   │\n" +
+		"│  • chezmoi-tui bitwarden status  - Show vault status            │\n" +
+		"│  • chezmoi-tui bitwarden unlock  - Unlock vault                 │\n" +
+		"│  • chezmoi-tui bitwarden lock    - Lock vault                   │\n" +
+		"│  • chezmoi-tui bitwarden list    - List items                  │\n" +
+		"│  • chezmoi-tui bitwarden sync    - Sync with server             │\n" +
+		"│  • chezmoi-tui bitwarden tui     - Launch Bitwarden TUI         │\n" +
+		"│                                                                 │\n" +
+		"│  Actions: Use arrow keys to navigate, 'h' to go back, 'q' to quit │\n" +
+		"└─────────────────────────────────────────────────────────────────┘\n"
+}
+
 func getDescription(choice string) string {
 	switch choice {
 	case "View Status":
@@ -408,6 +437,8 @@ func getDescription(choice string) string {
 		return "Show differences between source and destination"
 	case "Show Stats":
 		return "Show statistics about your dotfiles"
+	case "Bitwarden Manager":
+		return "Manage Bitwarden secrets and integration"
 	case "Exit":
 		return "Quit the application"
 	default:

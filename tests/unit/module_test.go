@@ -12,9 +12,9 @@ import (
 func TestModuleStructure(t *testing.T) {
 	// Use filepath to satisfy the import requirement
 	_ = filepath.Join("test", "path")
-	
+
 	t.Run("AllCommandsRegistered", func(t *testing.T) {
-		// This is more of a conceptual test - in practice, we ensure commands 
+		// This is more of a conceptual test - in practice, we ensure commands
 		// are registered through the package import mechanism we implemented
 		// Our current architecture properly registers commands via init() functions
 		t.Log("Commands are registered via package imports and init() functions")
@@ -42,25 +42,25 @@ func TestModuleStructure(t *testing.T) {
 
 	t.Run("PublicAPIConsistency", func(t *testing.T) {
 		// Parse the main package to ensure public APIs exist
-		pkgPath := "../.."  // Main package is in the root (2 levels up from tests/unit)
+		pkgPath := "../.." // Main package is in the root (2 levels up from tests/unit)
 		pkgs, err := parser.ParseDir(token.NewFileSet(), pkgPath, nil, parser.ParseComments)
 		if err != nil {
 			t.Skipf("Skipping test: cannot parse main package: %v", err)
 		}
-		
+
 		// In our actual implementation, RootCmd is in pkg/root/root.go
 		pkgPath = "../../pkg/root"
 		pkgs, err = parser.ParseDir(token.NewFileSet(), pkgPath, nil, parser.ParseComments)
 		if err != nil {
 			t.Skipf("Skipping test: cannot parse root package: %v", err)
 		}
-		
+
 		foundRootCmd := false
 		for _, pkg := range pkgs {
 			if pkg.Name != "root" {
 				continue
 			}
-			
+
 			for _, file := range pkg.Files {
 				for _, decl := range file.Decls {
 					if genDecl, ok := decl.(*ast.GenDecl); ok {
@@ -77,7 +77,7 @@ func TestModuleStructure(t *testing.T) {
 				}
 			}
 		}
-		
+
 		if !foundRootCmd {
 			t.Error("RootCmd not found in pkg/root")
 		}

@@ -46,7 +46,7 @@ var statsCmd = &cobra.Command{
 		for _, entry := range statusData {
 			destStatus := entry["dest_status"]
 			targetStatus := entry["target_status"]
-			
+
 			if strings.Contains(destStatus, "M") || strings.Contains(targetStatus, "M") {
 				modifiedCount++
 			} else if strings.Contains(destStatus, "A") || strings.Contains(targetStatus, "A") {
@@ -81,13 +81,13 @@ var statsCmd = &cobra.Command{
 		fmt.Printf("│ Total Managed Files:    %3d                                   │\n", len(validManagedFiles))
 		fmt.Printf("│ Total Unmanaged Files:  %3d                                   │\n", len(validUnmanagedFiles))
 		fmt.Println("├─────────────────────────────────────────────────────────────────┤")
-		fmt.Printf("│ Up to Date:             %3d (%3d%%)                           │\n", 
+		fmt.Printf("│ Up to Date:             %3d (%3d%%)                           │\n",
 			upToDateCount, calculatePercentage(upToDateCount, len(validManagedFiles)))
-		fmt.Printf("│ Modified:               %3d (%3d%%)                           │\n", 
+		fmt.Printf("│ Modified:               %3d (%3d%%)                           │\n",
 			modifiedCount, calculatePercentage(modifiedCount, len(validManagedFiles)))
-		fmt.Printf("│ Added:                  %3d (%3d%%)                           │\n", 
+		fmt.Printf("│ Added:                  %3d (%3d%%)                           │\n",
 			addedCount, calculatePercentage(addedCount, len(validManagedFiles)))
-		fmt.Printf("│ Deleted:                %3d (%3d%%)                           │\n", 
+		fmt.Printf("│ Deleted:                %3d (%3d%%)                           │\n",
 			deletedCount, calculatePercentage(deletedCount, len(validManagedFiles)))
 		fmt.Println("└─────────────────────────────────────────────────────────────────┘")
 

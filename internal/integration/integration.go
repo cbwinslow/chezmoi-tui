@@ -1,8 +1,8 @@
 package integration
 
 import (
-	"fmt"
 	"chezmoi-tui/internal/chezmoi"
+	"fmt"
 )
 
 // ChezmoiIntegration provides high-level operations for interacting with chezmoi
@@ -16,7 +16,7 @@ func New() (*ChezmoiIntegration, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create chezmoi client: %w", err)
 	}
-	
+
 	return &ChezmoiIntegration{
 		client: client,
 	}, nil
@@ -28,7 +28,7 @@ func (ci *ChezmoiIntegration) GetStatus() ([]map[string]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get status: %w", err)
 	}
-	
+
 	return ci.client.ParseStatusOutput(statusOutput), nil
 }
 

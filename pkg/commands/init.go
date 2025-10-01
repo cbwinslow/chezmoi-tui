@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"chezmoi-tui/pkg/root"
 	"chezmoi-tui/internal/integration"
+	"chezmoi-tui/pkg/root"
 )
 
 var initCmd = &cobra.Command{
@@ -30,7 +30,7 @@ var initCmd = &cobra.Command{
 		// Get flags
 		apply, _ := cmd.Flags().GetBool("apply")
 		purge, _ := cmd.Flags().GetBool("purge")
-		
+
 		var output string
 		if repo != "" {
 			output, err = integ.InitializeRepo(repo, apply)
@@ -38,7 +38,7 @@ var initCmd = &cobra.Command{
 			// Just init without a repo
 			output, err = integ.InitializeRepo("", apply)
 		}
-		
+
 		if err != nil {
 			log.Fatalf("Failed to initialize: %v", err)
 		}
@@ -46,7 +46,7 @@ var initCmd = &cobra.Command{
 		if output != "" {
 			fmt.Print(output)
 		}
-		
+
 		if purge {
 			// In a real implementation, this would purge the config, source, and cache directories
 			fmt.Println("Purge functionality would remove config, source, and cache directories")
@@ -58,7 +58,7 @@ func init() {
 	// Add flags
 	initCmd.Flags().BoolP("apply", "a", false, "Update destination directory")
 	initCmd.Flags().BoolP("purge", "p", false, "Purge config and source directories after running")
-	
+
 	// Add the command to the root
 	root.RootCmd.AddCommand(initCmd)
 }

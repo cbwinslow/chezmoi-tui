@@ -24,7 +24,7 @@ func TestCLICommands(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Version command failed: %v, output: %s", err, output)
 		}
-		
+
 		expected := "chezmoi-tui version"
 		if !contains(string(output), expected) {
 			t.Errorf("Expected version output to contain '%s', got: %s", expected, output)
@@ -38,7 +38,7 @@ func TestCLICommands(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Help command failed: %v, output: %s", err, output)
 		}
-		
+
 		expectedCommands := []string{"add", "apply", "status", "tui", "version"}
 		for _, cmd := range expectedCommands {
 			if !contains(string(output), cmd) {
@@ -50,10 +50,10 @@ func TestCLICommands(t *testing.T) {
 
 // Helper function to check if a string contains a substring
 func contains(s, substr string) bool {
-	return len(s) >= len(substr) && 
-		   (s == substr || 
-		    len(substr) == 0 || 
-		    (len(s) > len(substr) && 
-		     (s[:len(substr)] == substr || 
-		      contains(s[1:], substr))))
+	return len(s) >= len(substr) &&
+		(s == substr ||
+			len(substr) == 0 ||
+			(len(s) > len(substr) &&
+				(s[:len(substr)] == substr ||
+					contains(s[1:], substr))))
 }

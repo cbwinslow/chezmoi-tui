@@ -17,7 +17,7 @@ func New() (*Chezmoi, error) {
 	if err != nil {
 		return nil, fmt.Errorf("chezmoi binary not found in PATH: %w", err)
 	}
-	
+
 	return &Chezmoi{
 		binaryPath: binaryPath,
 	}, nil
@@ -26,12 +26,12 @@ func New() (*Chezmoi, error) {
 // Run executes a chezmoi command with the given arguments
 func (c *Chezmoi) Run(args ...string) (string, error) {
 	cmd := exec.Command(c.binaryPath, args...)
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("chezmoi %v failed: %w (output: %s)", args, err, string(output))
 	}
-	
+
 	return string(output), nil
 }
 
@@ -101,20 +101,20 @@ func (c *Chezmoi) Data() (string, error) {
 // ParseStatusOutput parses the output of the status command into structured data
 func (c *Chezmoi) ParseStatusOutput(output string) []map[string]string {
 	var result []map[string]string
-	
+
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
-		
+
 		// Split by whitespace but preserve file paths with spaces
 		parts := strings.Fields(line)
-		if len(parts) >= 1 {  // At least 2 parts: status and filename
+		if len(parts) >= 1 { // At least 2 parts: status and filename
 			// Extract the status column and filename
 			// In chezmoi status, there could be 1 column (status only) or 2+ columns
 			var destStatus, targetStatus, filename string
-			
+
 			if len(parts) == 2 {
 				// Format: status filename
 				destStatus = " "
@@ -132,7 +132,7 @@ func (c *Chezmoi) ParseStatusOutput(output string) []map[string]string {
 				targetStatus = " "
 				filename = parts[0]
 			}
-			
+
 			entry := map[string]string{
 				"dest_status":   destStatus,
 				"target_status": targetStatus,
@@ -141,6 +141,6 @@ func (c *Chezmoi) ParseStatusOutput(output string) []map[string]string {
 			result = append(result, entry)
 		}
 	}
-	
+
 	return result
 }
