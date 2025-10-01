@@ -74,6 +74,14 @@ dist: build-all
 	cd ${DIST_DIR} && sha256sum * > checksums.txt && cd ..
 	@echo "Release artifacts created in ${DIST_DIR}/"
 
+# Install to system (creates symlink)
+install-system:
+	./scripts/install.sh
+
+# Uninstall from system
+uninstall-system:
+	./scripts/uninstall.sh
+
 # Run the application
 run: build
 	./${BINARY_NAME}
@@ -123,6 +131,8 @@ help:
 	@echo "  build-all             - Build for all platforms"
 	@echo "  package-deb           - Create Debian package (amd64)"
 	@echo "  dist                  - Create distributable packages"
+	@echo "  install-system        - Install to system (creates symlink)"
+	@echo "  uninstall-system      - Uninstall from system"
 	@echo "  run                   - Build and run the application"
 	@echo "  docker-build          - Build Docker image"
 	@echo "  docker-push           - Push Docker image to registry"
