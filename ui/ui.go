@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -86,7 +87,7 @@ func RunTUI() error {
 
 // initialModel returns the initial state of the UI
 func initialModel(integ *integration.ChezmoiIntegration) Model {
-	choices := []string{"View Status", "Add Files", "Apply Changes", "Diff Changes", "Edit Config", "Exit"}
+	choices := []string{"View Status", "Add Files", "Apply Changes", "Diff Changes", "Show Stats", "Exit"}
 	
 	// Create items for the list
 	var items []list.Item
@@ -189,6 +190,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 							}
 						}
 						m.showFiles = true
+					} else if item.title == "Show Stats" {
+						// Show statistics about the dotfiles
+						statsContent, err := generateStatsContent(m.integration)
+						if err != nil {
+							statsContent = fmt.Sprintf("Error loading stats: %v", err)
+						}
+						m.viewport.SetContent(statsContent)
+						m.showFiles = true // Reuse the file view for stats display
 					}
 				}
 			}
@@ -306,6 +315,87 @@ func (m *Model) View() string {
 	}
 }
 
+func generateStatsContent(integ *integration.ChezmoiIntegration) (string, error) {
+	// Get status information
+	statusData, err := integ.GetStatus()
+	if err != nil {
+		return "", fmt.Errorf("could not get status data: %w", err)
+	}
+
+	// Get all managed files
+	managedOutput, err := integ.GetManagedFiles()
+	if err != nil {
+		return "", fmt.Errorf("could not get managed files: %w", err)
+	}
+
+	// Get unmanaged files
+	unmanagedOutput, err := integ.GetUnmanagedFiles()
+	if err != nil {
+		// This is okay, sometimes there are no unmanaged files
+	}
+
+	// Calculate stats
+	var modifiedCount, addedCount, deletedCount, upToDateCount int
+	for _, entry := range statusData {
+		destStatus := entry["dest_status"]
+		targetStatus := entry["target_status"]
+		
+		if strings.Contains(destStatus, "M") || strings.Contains(targetStatus, "M") {
+			modifiedCount++
+		} else if strings.Contains(destStatus, "A") || strings.Contains(targetStatus, "A") {
+			addedCount++
+		} else if strings.Contains(destStatus, "D") || strings.Contains(targetStatus, "D") {
+			deletedCount++
+		} else {
+			upToDateCount++
+		}
+	}
+
+	managedFiles := strings.Split(strings.TrimSpace(managedOutput), "\n")
+	var validManagedFiles []string
+	for _, file := range managedFiles {
+		if strings.TrimSpace(file) != "" {
+			validManagedFiles = append(validManagedFiles, file)
+		}
+	}
+
+	unmanagedFiles := strings.Split(strings.TrimSpace(unmanagedOutput), "\n")
+	var validUnmanagedFiles []string
+	for _, file := range unmanagedFiles {
+		if strings.TrimSpace(file) != "" {
+			validUnmanagedFiles = append(validUnmanagedFiles, file)
+		}
+	}
+
+	var content strings.Builder
+	content.WriteString("┌─ Chezmoi Dotfiles Statistics ──────────────────────────────────┐\n")
+	content.WriteString(fmt.Sprintf("│ Last Updated: %-47s │\n", time.Now().Format("2006-01-02 15:04:05")))
+	content.WriteString("├─────────────────────────────────────────────────────────────────┤\n")
+	content.WriteString(fmt.Sprintf("│ Total Managed Files:    %3d                                   │\n", len(validManagedFiles)))
+	content.WriteString(fmt.Sprintf("│ Total Unmanaged Files:  %3d                                   │\n", len(validUnmanagedFiles)))
+	content.WriteString("├─────────────────────────────────────────────────────────────────┤\n")
+	content.WriteString(fmt.Sprintf("│ Up to Date:             %3d (%3d%%)                           │\n", 
+		upToDateCount, calculatePercentage(upToDateCount, len(validManagedFiles))))
+	content.WriteString(fmt.Sprintf("│ Modified:               %3d (%3d%%)                           │\n", 
+		modifiedCount, calculatePercentage(modifiedCount, len(validManagedFiles))))
+	content.WriteString(fmt.Sprintf("│ Added:                  %3d (%3d%%)                           │\n", 
+		addedCount, calculatePercentage(addedCount, len(validManagedFiles))))
+	content.WriteString(fmt.Sprintf("│ Deleted:                %3d (%3d%%)                           │\n", 
+		deletedCount, calculatePercentage(deletedCount, len(validManagedFiles))))
+	content.WriteString("├─────────────────────────────────────────────────────────────────┤\n")
+	content.WriteString("│ Actions: Use arrow keys to navigate, 'h' to go back, 'q' to quit │\n")
+	content.WriteString("└─────────────────────────────────────────────────────────────────┘\n")
+
+	return content.String(), nil
+}
+
+func calculatePercentage(part, total int) int {
+	if total <= 0 {
+		return 0
+	}
+	return int(float64(part) / float64(total) * 100)
+}
+
 func getDescription(choice string) string {
 	switch choice {
 	case "View Status":
@@ -316,8 +406,8 @@ func getDescription(choice string) string {
 		return "Apply managed files to your system"
 	case "Diff Changes":
 		return "Show differences between source and destination"
-	case "Edit Config":
-		return "Edit configuration files"
+	case "Show Stats":
+		return "Show statistics about your dotfiles"
 	case "Exit":
 		return "Quit the application"
 	default:
